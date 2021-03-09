@@ -1,0 +1,10 @@
+name: scraper_git
+title:
+username:
+account: ltmoo2
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3761008
+bundleId: 4321013
+url: https://ltmoo2.shinyapps.io/scraper_git/
+when: 1615297748.88677
