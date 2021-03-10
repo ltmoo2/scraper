@@ -7,6 +7,7 @@ library(tidyr)
 library(purrr)
 library(lubridate)
 library(readr)
+library(shinycssloaders)
 
 ui <- fluidPage(
     
@@ -19,7 +20,7 @@ ui <- fluidPage(
             textInput("url",
                       "Paste URL"),
             dateInput("date",
-                      "Select Earliest Lease",
+                      "Select Date of Last Scrape",
                       value = Sys.Date()),
             numericInput("pgs", 
                          "Select Number of Pages",
@@ -31,7 +32,8 @@ ui <- fluidPage(
         
         
         mainPanel(
-            dataTableOutput("test")
+            dataTableOutput("test") %>%
+                withSpinner(color="#0dc5c1")
         )
     )
 )
@@ -114,11 +116,9 @@ server <- function(input, output) {
                     rename("Agent" = value)
                 
                 property <- bind_cols(address, attr, desc, agency, agent) %>%
-                    select(Address, `Floor area`, `Leased on`, Description, Agency, Agent) %>%
-                    mutate("Source" = paste(page$value)) %>%
-                    mutate("Floor area" = substr(`Floor area`, 1, nchar(`Floor area`)-3))
+                    mutate("Source" = paste(page$value))
                 
-                final_table <- rbind(final_table, property)
+                final_table <- bind_rows(final_table, property)
                 
             }
             
@@ -138,7 +138,8 @@ server <- function(input, output) {
         final_table <- final_table %>%
             separate(Address, c("Address", "Street_Type"), sep = " (?=[^ ]*$)", remove = FALSE) %>%
             separate(Address, c("Address", "Street_Name"), sep = " (?=[^ ]*$)", remove = FALSE) %>%
-            select(Address, Street_Name, Street_Type, Suburb, Postcode, `Floor area`, `Leased on`:Source)
+            select(Address, Street_Name, Street_Type, Suburb, Postcode, `Floor area`, `Leased on`:Source) %>%
+            mutate("Floor area" = substr(`Floor area`, 1, nchar(`Floor area`)-3))
         
         
         return(final_table)
