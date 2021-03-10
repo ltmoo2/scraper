@@ -115,7 +115,8 @@ server <- function(input, output) {
                 
                 property <- bind_cols(address, attr, desc, agency, agent) %>%
                     select(Address, `Floor area`, `Leased on`, Description, Agency, Agent) %>%
-                    mutate("Source" = paste(page$value))
+                    mutate("Source" = paste(page$value)) %>%
+                    mutate("Floor area" = substr(`Floor area`, 1, nchar(`Floor area`)-3))
                 
                 final_table <- rbind(final_table, property)
                 
@@ -125,7 +126,19 @@ server <- function(input, output) {
         
         final_table <- final_table %>%
             mutate("Leased on" = dmy(`Leased on`)) %>%
-            filter(`Leased on` >= input$date)
+            filter(`Leased on` >= input$date) %>%
+            mutate("Postcode" = substr(Address, nchar(Address)-4, nchar(Address))) %>%
+            mutate("Address" = substr(Address, 1, nchar(Address)-10))
+        
+        final_table <- final_table %>%
+            mutate("Address" = str_split(Address, ",\\s*(?=[^,]+$)")) %>%
+            mutate("Suburb" = map_chr(Address, 2)) %>%
+            mutate("Address" = map_chr(Address, 1))
+        
+        final_table <- final_table %>%
+            separate(Address, c("Address", "Street_Type"), sep = " (?=[^ ]*$)", remove = FALSE) %>%
+            separate(Address, c("Address", "Street_Name"), sep = " (?=[^ ]*$)", remove = FALSE) %>%
+            select(Address, Street_Name, Street_Type, Suburb, Postcode, `Floor area`, `Leased on`:Source)
         
         
         return(final_table)
