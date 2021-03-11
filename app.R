@@ -22,9 +22,6 @@ ui <- fluidPage(
             dateInput("date",
                       "Select Date of Last Scrape",
                       value = Sys.Date()),
-            numericInput("pgs", 
-                         "Select Number of Pages",
-                         value = 5),
             actionButton("create",
                          "Scrape"),
             downloadButton("download", "Download Data")
@@ -46,7 +43,7 @@ server <- function(input, output) {
         
         req(input$create)
         
-        pages <- paste0(input$url, "&page=", c(1:input$pgs))
+        pages <- paste0(input$url, "&page=", c(1:25))
     })
     
     final_table <- reactive({
@@ -116,17 +113,24 @@ server <- function(input, output) {
                     rename("Agent" = value)
                 
                 property <- bind_cols(address, attr, desc, agency, agent) %>%
-                    mutate("Source" = paste(page$value))
+                    mutate("Source" = paste(page$value)) %>%
+                    mutate("Leased on" = dmy(`Leased on`))
                 
+                if(property$`Leased on` < input$date)
+                {
+                    break
+                }
+                
+                else if(property$`Leased on` >= input$date)
+                {
                 final_table <- bind_rows(final_table, property)
+                }
                 
             }
             
         }
         
-        final_table <- final_table %>%
-            mutate("Leased on" = dmy(`Leased on`)) %>%
-            filter(`Leased on` >= input$date) %>%
+        final_table <- final_table  %>%
             mutate("Postcode" = substr(Address, nchar(Address)-4, nchar(Address))) %>%
             mutate("Address" = substr(Address, 1, nchar(Address)-10))
         
