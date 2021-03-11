@@ -79,8 +79,13 @@ server <- function(input, output) {
                 
                 address <- html_nodes(result, "h1") %>%
                     html_text() %>%
-                    as_tibble()%>%
+                    as_tibble() %>%
                     rename("Address" = value)
+                
+                prop_type <- html_nodes(result, ".PrimaryDetailsTop_propertyTypes_1mGFK") %>%
+                    html_text() %>%
+                    as_tibble() %>%
+                    rename("Prop_type" = value)
                 
                 attr_desc <- html_nodes(result, ".Attribute_label_1bYjg") %>%
                     html_text() %>%
@@ -112,7 +117,7 @@ server <- function(input, output) {
                     top_n(1) %>%
                     rename("Agent" = value)
                 
-                property <- bind_cols(address, attr, desc, agency, agent) %>%
+                property <- bind_cols(address, prop_type, attr, desc, agency, agent) %>%
                     mutate("Source" = paste(page$value)) %>%
                     mutate("Leased on" = dmy(`Leased on`))
                 
@@ -142,7 +147,7 @@ server <- function(input, output) {
         final_table <- final_table %>%
             separate(Address, c("Address", "Street_Type"), sep = " (?=[^ ]*$)", remove = FALSE) %>%
             separate(Address, c("Address", "Street_Name"), sep = " (?=[^ ]*$)", remove = FALSE) %>%
-            select(Address, Street_Name, Street_Type, Suburb, Postcode, `Floor area`, `Leased on`:Source) %>%
+            select(Address, Street_Name, Street_Type, Suburb, Postcode, Prop_type, `Floor area`, `Leased on`:Source) %>%
             mutate("Floor area" = substr(`Floor area`, 1, nchar(`Floor area`)-3))
         
         
