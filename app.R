@@ -8,6 +8,7 @@ library(purrr)
 library(lubridate)
 library(readr)
 library(shinycssloaders)
+library(writexl)
 
 ui <- fluidPage(
     
@@ -123,14 +124,23 @@ server <- function(input, output) {
                 
                 if(property$`Leased on` < input$date)
                 {
+                    breaker <-  TRUE
+                    
                     break
                 }
                 
                 else if(property$`Leased on` >= input$date)
                 {
-                final_table <- bind_rows(final_table, property)
+                    breaker <- FALSE
+                    
+                    final_table <- bind_rows(final_table, property)
                 }
                 
+            }
+            
+            if(breaker == TRUE)
+            {
+                break
             }
             
         }
@@ -162,10 +172,10 @@ server <- function(input, output) {
     
     output$download <- downloadHandler(
         filename = function() {
-            paste0(Sys.Date(), " - Scrape.csv")
+            paste0(Sys.Date(), " - Scrape.xlsx")
         },
         content = function(file) {
-            write_csv(final_table(), file)
+            write_xlsx(final_table(), file)
         }
     )
     
