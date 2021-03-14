@@ -5,6 +5,6 @@ account: ltmoo2
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3761008
-bundleId: 4330625
+bundleId: 4340978
 url: https://ltmoo2.shinyapps.io/scraper_git/
-when: 1615462810.08034
+when: 1615682672.5261
