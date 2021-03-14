@@ -146,7 +146,7 @@ server <- function(input, output) {
         }
         
         final_table <- final_table  %>%
-            mutate("Postcode" = substr(Address, nchar(Address)-4, nchar(Address))) %>%
+            mutate("Postcode" = as.numeric(substr(Address, nchar(Address)-4, nchar(Address)))) %>%
             mutate("Address" = substr(Address, 1, nchar(Address)-10))
         
         final_table <- final_table %>%
@@ -155,9 +155,10 @@ server <- function(input, output) {
             mutate("Address" = map_chr(Address, 1))
         
         final_table <- final_table %>%
+            mutate("Street_Address" = paste0(Address, ", ", Suburb, " ", Postcode)) %>%
             separate(Address, c("Address", "Street_Type"), sep = " (?=[^ ]*$)", remove = FALSE) %>%
-            separate(Address, c("Address", "Street_Name"), sep = " (?=[^ ]*$)", remove = FALSE) %>%
-            select(Address, Street_Name, Street_Type, Suburb, Postcode, Prop_type, `Floor area`, `Leased on`:Source) %>%
+            separate(Address, c("Street_No", "Street_Name"), sep = " (?=[^ ]*$)", remove = FALSE) %>%
+            select(Street_Address, Street_No, Street_Name, Street_Type, Suburb, Postcode, Prop_type, `Floor area`, `Leased on`:Source) %>%
             mutate("Floor area" = substr(`Floor area`, 1, nchar(`Floor area`)-3))
         
         
